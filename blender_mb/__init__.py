@@ -11,24 +11,14 @@
 # You should have received a copy of the GNU General Public License
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 
-from dataclasses import dataclass
 from math import sqrt
-import math
 from typing import List, Tuple
 import bpy
 import mathutils
 from bpy.props import (
     BoolProperty,
-    CollectionProperty,
     FloatProperty,
-    IntProperty,
-    StringProperty,
-    EnumProperty,
     PointerProperty,
-)
-from bpy_extras.io_utils import (
-    ImportHelper,
-    ExportHelper,
 )
 
 
