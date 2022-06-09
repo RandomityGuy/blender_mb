@@ -234,21 +234,34 @@ scene_marbles = {}
 scene_obj_positions = {}
 scene_obj_velocities = {}
 
+is_playing = False
+prev_t = 1
+
 def play_mb():
     bpy.context.scene.render.fps = 60
-    bpy.ops.screen.animation_play()
-    if tick_mb not in bpy.app.handlers.frame_change_pre:
-        bpy.app.handlers.frame_change_pre.append(tick_mb)
+    global is_playing, prev_t
 
-    scene_marbles.clear()
-    scene_obj_positions.clear()
-    scene_obj_velocities.clear()
+    if not is_playing:
+        prev_t = 1
+        bpy.ops.screen.animation_play()
+        if tick_mb not in bpy.app.handlers.frame_change_pre:
+            bpy.app.handlers.frame_change_pre.append(tick_mb)
 
-    for obj in bpy.context.scene.objects:
-        if obj.mb_props.enable_mb_physics:
-            if obj.type == 'MESH':
-                scene_marbles[obj] = Marble(obj)
+        scene_marbles.clear()
+        scene_obj_positions.clear()
+        scene_obj_velocities.clear()
 
+        for obj in bpy.context.scene.objects:
+            if obj.mb_props.enable_mb_physics:
+                if obj.type == 'MESH':
+                    scene_marbles[obj] = Marble(obj)
+
+        is_playing = True
+    else:
+        bpy.app.handlers.frame_change_pre.remove(tick_mb)
+        bpy.ops.screen.animation_cancel()
+
+        is_playing = False
 class Contact:
     def __init__(self, normal: mathutils.Vector, contactDistance: float, obj: bpy.types.Object, restitution: float, friction: float, force: float, velocity: mathutils.Vector = mathutils.Vector((0, 0, 0))):
         self.normal = normal
@@ -676,10 +689,30 @@ class Marble:
 
             finalmat = mathutils.Matrix.LocRotScale(trans, deltarot, scale)
 
+            self.shape.location = trans
+            self.shape.keyframe_insert(data_path='location', frame=bpy.context.scene.frame_current)
+
             self.shape.matrix_world = finalmat
+
+            self.shape.keyframe_insert(data_path='rotation_euler', frame=bpy.context.scene.frame_current)
+            
 
 
 def tick_mb(x0, x1):
+    global prev_t, is_playing
+
+    t = bpy.context.scene.frame_current
+
+    if t - prev_t > 1:
+        is_playing = False
+        bpy.app.handlers.frame_change_pre.remove(tick_mb)
+        return
+
+    prev_t = t
+
+    if not bpy.context.screen.is_animation_playing or not is_playing:
+        return
+
     DT = 1/60
     m = Move(mathutils.Vector((0, 0, 0)), False, False)
     blankm = Move(mathutils.Vector((0, 0, 0)), False, False)
@@ -729,3 +762,14 @@ def tick_mb(x0, x1):
             view_eul.x += input_value['mouseY'] * cam_sens
 
             r3d.view_rotation = view_eul.to_quaternion()
+
+            cam = bpy.context.scene.camera
+
+            cam.location = r3d.view_rotation.to_matrix().col[2].to_3d()
+            cam.location *= r3d.view_distance
+            cam.location += r3d.view_location
+
+            cam.rotation_euler = r3d.view_rotation.to_euler()
+
+            bpy.context.scene.camera.keyframe_insert(data_path='location', frame=bpy.context.scene.frame_current)
+            bpy.context.scene.camera.keyframe_insert(data_path='rotation_euler', frame=bpy.context.scene.frame_current)

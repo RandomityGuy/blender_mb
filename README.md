@@ -6,6 +6,7 @@ This is a blender plugin that adds a controllable marble from Marble Blast to yo
 - Modify marble physics parameters and material parameters
 - Control the marble using keyboard and mouse.
 - Ability to toggle diagonal movement and speed cap
+- Save the marble and camera movements as keyframes for animation
 
 # Installation
 Download the plugin from Releases and install it how you normally install blender plugins.
