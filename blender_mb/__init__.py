@@ -188,7 +188,7 @@ class ControlMarble(bpy.types.Operator):
             return self.report({"ERROR"}, 'Object is not a Marble!')
         control_marble = scene_marbles[bpy.context.active_object]
         context.window_manager.modal_handler_add(self)
-        bpy.context.window.cursor_warp(bpy.context.window.width / 2, bpy.context.window.height / 2)
+        bpy.context.window.cursor_warp(int(bpy.context.window.width / 2), int(bpy.context.window.height / 2))
         return {'RUNNING_MODAL'}
 
     def modal(self, context, event):
