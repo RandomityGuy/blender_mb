@@ -3,7 +3,7 @@ bl_info = {
     "author" : "RandomityGuy",
     "description" : "",
     "blender" : (2, 80, 0),
-    "version" : (0, 0, 4),
+    "version" : (0, 0, 5),
     "location" : "View3D",
     "warning" : "",
     "category" : "Generic"
@@ -354,7 +354,11 @@ class Marble:
             (found, contactpt, normal, face_index) = obj.closest_point_on_mesh(obj.matrix_world.inverted_safe() @ self.position)
 
             if found:
-                mesh: bpy.types.Mesh = obj.data
+
+                depsgraph = bpy.context.evaluated_depsgraph_get()
+                obj_mod = obj.evaluated_get(depsgraph)
+
+                mesh: bpy.types.Mesh = obj_mod.data
                 
                 contactpt = obj.matrix_world @ mathutils.Vector(contactpt)
                 distsq = (self.position - contactpt).length_squared
@@ -703,6 +707,9 @@ def tick_mb(x0, x1):
     global prev_t, is_playing
 
     t = bpy.context.scene.frame_current
+
+    if t + 1 == bpy.context.scene.frame_end:
+        bpy.context.scene.frame_end += 1 
 
     if t - prev_t > 1:
         is_playing = False
