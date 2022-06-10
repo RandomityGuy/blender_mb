@@ -3,7 +3,7 @@ bl_info = {
     "author" : "RandomityGuy",
     "description" : "",
     "blender" : (2, 80, 0),
-    "version" : (0, 0, 1),
+    "version" : (0, 0, 4),
     "location" : "View3D",
     "warning" : "",
     "category" : "Generic"
@@ -258,7 +258,8 @@ def play_mb():
 
         is_playing = True
     else:
-        bpy.app.handlers.frame_change_pre.remove(tick_mb)
+        if tick_mb in bpy.app.handlers.frame_change_pre:
+            bpy.app.handlers.frame_change_pre.remove(tick_mb)
         bpy.ops.screen.animation_cancel()
 
         is_playing = False
@@ -705,7 +706,8 @@ def tick_mb(x0, x1):
 
     if t - prev_t > 1:
         is_playing = False
-        bpy.app.handlers.frame_change_pre.remove(tick_mb)
+        if tick_mb in bpy.app.handlers.frame_change_pre:
+            bpy.app.handlers.frame_change_pre.remove(tick_mb)
         return
 
     prev_t = t
