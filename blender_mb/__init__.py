@@ -3,7 +3,7 @@ bl_info = {
     "author" : "RandomityGuy",
     "description" : "",
     "blender" : (2, 80, 0),
-    "version" : (0, 0, 5),
+    "version" : (0, 0, 6),
     "location" : "View3D",
     "warning" : "",
     "category" : "Generic"
@@ -330,9 +330,12 @@ class Marble:
             obj_inverse: mathutils.Matrix = obj.matrix_world.inverted_safe()
             obj_inverse_33 = obj_inverse.to_3x3().to_4x4()
             local_vel = obj_inverse_33 @ self.velocity
-            result, location, norm, idx = obj.ray_cast(obj_inverse @ self.position, local_vel, distance=(local_vel * shortest_t).length)
-            if result:
-                shortest_t = min(shortest_t, (location - self.position).length / local_vel.length)
+            try:
+                result, location, norm, idx = obj.ray_cast(obj_inverse @ self.position, local_vel, distance=(local_vel * shortest_t).length)
+                if result:
+                    shortest_t = min(shortest_t, (location - self.position).length / local_vel.length)
+            except:
+                pass # Skip CCD for this thing
 
         return max(shortest_t, 0.001)
 
